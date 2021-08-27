@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Sequences for divisa.orden -->
+        <record id="seq_divisa_orden" model="ir.sequence">
+            <field name="name">Divisa orden</field>
+            <field name="code">divisa.orden</field>
+            <field name="prefix">DIV</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

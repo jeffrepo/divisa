@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_divisa_configuracion_usuario,divisa.configuracion.ususario,divisa.model_divisa_configuracion,base.group_user,1,1,1,1
+access_divisa_orden_linea,divisa.orden.linea.ususario,divisa.model_divisa_orden_linea,base.group_user,1,1,1,1
+access_divisa_tipo_linea,divisa.tipo.linea.usuario,divisa.model_divisa_tipo_linea,base.group_user,1,1,1,1
+access_divisa_configuracion_linea_usuario,divisa.configuracion.linea.ususario,divisa.model_divisa_configuracion_linea,base.group_user,1,1,1,1
+access_divisa_orden,divisa.orden.usuario,divisa.model_divisa_orden,base.group_user,1,1,1,1
