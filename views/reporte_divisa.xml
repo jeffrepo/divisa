@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="reporte_divisa">
+        <t t-call="web.html_container">
+            <t t-set="data_report_margin_top" t-value="12"/>
+            <t t-set="data_report_header_spacing" t-value="9"/>
+            <t t-set="data_report_dpi" t-value="110"/>
+            <t t-foreach="docs" t-as="o">
+                <div class="article">
+                    <div class="page" style="font-size:18px">
+
+                        <div class="copia">
+                            <h2>Comprobante</h2>
+
+                            <center><span t-field="o.fecha"/></center>
+                            <center><span t-field="o.name"/></center>
+                            <center><span t-field="o.cliente_id.name"/></center>
+                            <br/>
+                            <center><span t-field="o.tipo"/></center>
+                            <t t-set="total_monto" t-value="0"/>
+                            <t t-set="total_valor" t-value="0"/>
+                            <table class="table table-sm o_main_table">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:center">MONTO</th>
+                                        <th style="text-align:center">TASA</th>
+                                        <th style="text-align:center">VALOR</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.divisa_linea_ids" t-as="linea">
+                                        <td style="text-align:right"><span t-field="linea.monto" t-options="{'widget': 'monetary', 'display_currency': o.moneda_monto_id}"/></td>
+                                        <td style="text-align:right"><span t-field="linea.tasa" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td style="text-align:right"><span t-field="linea.valor" t-options="{'widget': 'monetary', 'display_currency': o.moneda_valor_id}"/></td>
+                                        <t t-set="total_monto" t-value="total_monto+linea.monto"/>
+                                        <t t-set="total_valor" t-value="total_valor+linea.valor"/>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:right"><strong><span t-esc="total_monto" t-options="{'widget': 'monetary', 'display_currency': o.moneda_monto_id}"/></strong></td>
+                                        <td><strong><center>CANTIDAD A PAGAR</center></strong></td>
+                                        <td style="text-align:right"><strong><span t-esc="total_valor" t-options="{'widget': 'monetary', 'display_currency': o.moneda_valor_id}"/></strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <center><strong>Recibi conforme a la cantidad arriba indicada y no tengo ningun reclamo (f)______________________</strong></center>
+                            <br/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
