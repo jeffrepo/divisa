@@ -111,8 +111,12 @@ class DivisaOrden(models.Model):
             if len(factura_creada) == 0:
                 user_tz = self.env.user.tz or pytz.utc
                 local = pytz.timezone(user_tz)
+                # display_date_result = datetime.strftime(pytz.utc.localize(datetime.strptime(str(divisa.fecha),
+                # DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%d/%m/%Y")
+
                 display_date_result = datetime.strftime(pytz.utc.localize(datetime.strptime(str(divisa.fecha),
-                DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%d/%m/%Y")
+                DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%Y-%m-%d")
+
                 factura_dic = {'invoice_date': dateutil.parser.parse(display_date_result).date(),'partner_id': divisa.factura_cliente_id.id if divisa.factura_cliente_id else divisa.cliente_id.id,'journal_id':1,
                     'payment_reference': divisa.name,
                     'move_type': 'out_invoice'}
