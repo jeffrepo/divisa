@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import pytz
 from odoo.exceptions import UserError, AccessError
+import dateutil.parser
 import logging
 
 class DivisaConfiguracion(models.Model):
@@ -106,18 +107,26 @@ class DivisaOrden(models.Model):
 
     def crear_factura(self):
         for divisa in self:
-            factura_dic = {'partner_id': divisa.factura_cliente_id.id if divisa.factura_cliente_id else divisa.cliente_id.id,'journal_id':1,
-                'payment_reference': divisa.name,
-                'move_type': 'out_invoice'}
-            factura_id = self.env['account.move'].create(factura_dic)
-            if factura_id:
-                producto_id = self.env['product.product'].search([('comision_divisa','=',True)])
-                lineas_lista = []
-                if producto_id:
-                    linea_dic = {'product_id': producto_id.id, 'quantity': 1, 'price_unit': divisa.interes}
-                    if producto_id.taxes_id:
-                        linea_dic['tax_ids'] = producto_id.taxes_id.ids
-                    factura_id.write({'invoice_line_ids': [(0, 0, linea_dic) ]})
+            factura_creada = self.env['account.move'].search([('payment_reference','=', divisa.name)])
+            if len(factura_creada) == 0:
+                user_tz = self.env.user.tz or pytz.utc
+                local = pytz.timezone(user_tz)
+                display_date_result = datetime.strftime(pytz.utc.localize(datetime.strptime(str(divisa.fecha),
+                DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%d/%m/%Y")
+                factura_dic = {'invoice_date': dateutil.parser.parse(display_date_result).date(),'partner_id': divisa.factura_cliente_id.id if divisa.factura_cliente_id else divisa.cliente_id.id,'journal_id':1,
+                    'payment_reference': divisa.name,
+                    'move_type': 'out_invoice'}
+                factura_id = self.env['account.move'].create(factura_dic)
+                if factura_id:
+                    producto_id = self.env['product.product'].search([('comision_divisa','=',True)])
+                    lineas_lista = []
+                    if producto_id:
+                        linea_dic = {'product_id': producto_id.id, 'quantity': 1, 'price_unit': divisa.interes}
+                        if producto_id.taxes_id:
+                            linea_dic['tax_ids'] = producto_id.taxes_id.ids
+                        factura_id.write({'invoice_line_ids': [(0, 0, linea_dic) ]})
+            else:
+                raise UserError(_('Factura ya existente'))
         return True
 
     def calcular_divisa(self):
@@ -125,12 +134,10 @@ class DivisaOrden(models.Model):
             total = 0
             interes = 0
             if divisa.divisa_linea_ids:
-                logging.warning(fields.Date.to_string(divisa.fecha))
                 user_tz = self.env.user.tz or pytz.utc
                 local = pytz.timezone(user_tz)
                 display_date_result = datetime.strftime(pytz.utc.localize(datetime.strptime(str(divisa.fecha),
                 DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%d/%m/%Y")
-                logging.warning(display_date_result)
                 tasa_id = self.env['divisa.configuracion'].search([('fecha','=',display_date_result),('tipo','=', divisa.tipo)])
                 if tasa_id:
                     if len(tasa_id) > 1:
