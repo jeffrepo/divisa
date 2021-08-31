@@ -14,7 +14,7 @@
     'category': 'Uncategorized',
     'version': '0.1',
 
-    'depends': [],
+    'depends': ['product'],
 
     'data': [
         'data/ir_sequence_data.xml',

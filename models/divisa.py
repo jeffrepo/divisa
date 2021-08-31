@@ -23,7 +23,7 @@ class DivisaConfiguracion(models.Model):
     ], required=True,
         help="Escoja el tipo de divisa")
     linea_ids = fields.One2many('divisa.configuracion.linea','config_id','Lineas')
-    interes = fields.Float('% Interés', required=True, default=10)
+    interes = fields.Float('Comisión por cambio de divisa', required=True, default=10)
 
 class DivisaConfiguracion(models.Model):
     _name = "divisa.configuracion.linea"
@@ -54,7 +54,7 @@ class DivisaOrden(models.Model):
         'res.users', string='Creacion orden', index=True, tracking=2, default=lambda self: self.env.user)
     cliente_id = fields.Many2one('res.partner', string='Cliente',required=True,tracking=1)
     divisa_linea_ids = fields.One2many('divisa.orden.linea','divisa_orden_id','Linea')
-    interes = fields.Float('Interés')
+    interes = fields.Float('Comisión por cambio de divisa')
     total = fields.Float('Total')
     moneda_monto_id = fields.Many2one('res.currency','Moneda monto')
     moneda_valor_id = fields.Many2one('res.currency','Moneda valor')
@@ -63,6 +63,7 @@ class DivisaOrden(models.Model):
         ('nuevo', 'Nuevo'),
         ('hecho','hecho'),
     ], string='Status', help='Estado',readonly=True, default='nuevo')
+    factura_cliente_id = fields.Many2one('res.partner','Factura a nombre de')
 
 
     @api.onchange('tipo')
@@ -102,6 +103,22 @@ class DivisaOrden(models.Model):
 
         result = super(DivisaOrden, self).create(vals)
         return result
+
+    def crear_factura(self):
+        for divisa in self:
+            factura_dic = {'partner_id': divisa.factura_cliente_id.id if divisa.factura_cliente_id else divisa.cliente_id.id,'journal_id':1,
+                'payment_reference': divisa.name,
+                'move_type': 'out_invoice'}
+            factura_id = self.env['account.move'].create(factura_dic)
+            if factura_id:
+                producto_id = self.env['product.product'].search([('comision_divisa','=',True)])
+                lineas_lista = []
+                if producto_id:
+                    linea_dic = {'product_id': producto_id.id, 'quantity': 1, 'price_unit': divisa.interes}
+                    if producto_id.taxes_id:
+                        linea_dic['tax_ids'] = producto_id.taxes_id.ids
+                    factura_id.write({'invoice_line_ids': [(0, 0, linea_dic) ]})
+        return True
 
     def calcular_divisa(self):
         for divisa in self:
@@ -150,3 +167,8 @@ class DivisaTipoLinea(models.Model):
     _description = "Diviso tipo linea"
 
     name = fields.Char('Nombre')
+
+class ProductProduct(models.Model):
+    _inherit = "product.product"
+
+    comision_divisa = fields.Boolean('Comision Divisa')
