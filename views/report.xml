@@ -2,14 +2,15 @@
 <odoo>
     <data>
 
-        <report
-            id="divisa_reporte_divisa_report"
-            string="Reporte divisa"
-            model="divisa.orden"
-            report_type="qweb-pdf"
-            file="divisa.reporte_divisa"
-            name="divisa.reporte_divisa"
-        />
+        <record id="divisa_reporte_divisa_report" model="ir.actions.report">
+                <field name="name">Reporte Divisa</field>
+                <field name="model">divisa.orden</field>
+                <field name="report_type">qweb-pdf</field>
+                <field name="report_name">divisa.reporte_divisa</field>
+                <field name="report_file">divisa.reporte_divisa</field>
+                <field name="binding_model_id" ref="divisa.model_divisa_orden"/>
+                <field name="binding_type">report</field>
+            </record>
 
     </data>
 </odoo>

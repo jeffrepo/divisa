@@ -119,6 +119,7 @@
                     <field name="tipo"/>
                     <field name="fecha"/>
                     <field name="cliente_id"/>
+                    <field name="total"/>
                 </tree>
             </field>
         </record>
